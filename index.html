@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic Tac Toe on the Blockchain</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <script src="./app.js"></script>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+  <h2>This is Tic Tac Toe on the Blockchain</h2>
+  <div class="start-game">
+  <button onclick="App.startNewGame()">Start New Game</button>
+  <button onclick="App.joinGame();">Join an existing game</button>
+  <button onclick="App.setActiveAccount(1);">Active Account 1</button>
+</div>
+<div class="game-play">
+Game address: <span id="gameAddress"> </span>
+<div class="player-join">Waiting for other player to join...</div>
+<div id="opponent"></div>
+<div class="next-turn">Your Turn!</div>
+<div class="waiting-for-turn">Waiting for your Opponent to Play...</div>
+  <table id="board">
+    <tbody>
+  <tr>
+  <td></td>
+  <td></td>
+  <td></td>
+    </tr>
+  <tr>
+  <td></td>
+  <td></td>
+  <td></td>
+    </tr>
+  <tr>
+  <td></td>
+  <td></td>
+  <td></td>
+    </tr>
+  </tbody>
+  </table>
+</div>
+  <span id="status"></span>
+  <br>
+  <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
+</body>
+</html>
