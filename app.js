@@ -38349,6 +38349,7 @@ var watchForNextPlayer;
 var watchForGameWon;
 var watchForGameDraw;
 var logDebug = true;
+var arrEventsFired;
 
 window.App = {
   start: function() {
@@ -38373,6 +38374,7 @@ window.App = {
       account = accounts[0];
 
       App.debugOutput(account);
+      arrEventsFired = [];
 
 
     });
@@ -38432,6 +38434,8 @@ window.App = {
           return activeGame.joinGame({ value: web3.toWei(0.1, "ether"), from: account, gas: 4000000});
         }).then(tx => {
           App.debugOutput("Joined the game", tx);
+
+          __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".waiting-for-turn").show();
           __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".game-play").show();
           __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#board").show();
           __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#gameAddress").text(activeGame.address);
@@ -38482,19 +38486,30 @@ window.App = {
   },
 
   nextPlayer: function(err, response) {
-    App.debugOutput("Received event for NextPlayer", response);
-    App.updateBoard(true);
-    if(response.args._player == account) {
-      __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".waiting-for-turn").hide();
-      __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".next-turn").show();
-      for(var i = 0; i < 3; i++) {
-        for(var j = 0; j < 3; j++) {
-          __WEBPACK_IMPORTED_MODULE_1_jquery___default()(__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#board")[0].children[0].children[i].children[j]).click({x: i, y:j}, App.setStone);
+    if(arrEventsFired.indexOf(response.blockNumber) === -1) {
+      arrEventsFired.push(response.blockNumber);
+      App.debugOutput("Received event for NextPlayer", response);
+      App.updateBoard();
+      if(response.args._player == account) {
+        __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".waiting-for-turn").hide();
+        __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".next-turn").show();
+
+        /**
+        Set the On-Click Handler
+        **/
+        for(var i = 0; i < 3; i++) {
+          for(var j = 0; j < 3; j++) {
+            if(__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#board")[0].children[0].children[i].children[j].innerHTML == "") {
+              __WEBPACK_IMPORTED_MODULE_1_jquery___default()(__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#board")[0].children[0].children[i].children[j]).off('click').click({x: i, y:j}, App.setStone);
+            }
+          }
         }
+      } else {
+        __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".next-turn").hide();
+        __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".waiting-for-turn").show();
       }
     } else {
-      __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".next-turn").hide();
-      __WEBPACK_IMPORTED_MODULE_1_jquery___default()(".waiting-for-turn").show();
+      App.debugOutput("Event already received, skipping", response);
     }
   },
   updateBoard: function() {
@@ -38518,6 +38533,18 @@ window.App = {
     activeGame.setStone(event.data.x, event.data.y, {from: account, gas:3000000}).then(function(txResult) {
           App.debugOutput("Successfully mined Transaction from setStone", txResult);
           return App.updateBoard();
+    }).catch(function(err) {
+      console.error(err);
+      /**
+      Set the On-Click Handler again, we had a problem there
+      **/
+      for(var i = 0; i < 3; i++) {
+        for(var j = 0; j < 3; j++) {
+          if(__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#board")[0].children[0].children[i].children[j].innerHTML == "") {
+            __WEBPACK_IMPORTED_MODULE_1_jquery___default()(__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#board")[0].children[0].children[i].children[j]).click({x: i, y:j}, App.setStone);
+          }
+        }
+      }
     })
   },
 
@@ -38558,7 +38585,7 @@ window.addEventListener('load', function() {
   } else {
     console.warn("No web3 detected. Falling back to http://127.0.0.1:9545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new __WEBPACK_IMPORTED_MODULE_2_web3___default.a(new __WEBPACK_IMPORTED_MODULE_2_web3___default.a.providers.HttpProvider("http://127.0.0.1:9545"));
+    window.web3 = new __WEBPACK_IMPORTED_MODULE_2_web3___default.a(new __WEBPACK_IMPORTED_MODULE_2_web3___default.a.providers.HttpProvider("http://127.0.0.1:8545"));
   }
 
   App.start();
